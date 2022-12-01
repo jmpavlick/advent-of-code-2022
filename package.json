@@ -7,5 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "elm": "^0.19.1-5",
+    "elm-format": "^0.8.5",
+    "elm-go": "^5.0.19",
+    "fs": "^0.0.1-security",
+    "onchange": "^7.1.0",
+    "run-pty": "^4.0.3"
+  }
 }

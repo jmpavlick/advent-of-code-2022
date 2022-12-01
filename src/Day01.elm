@@ -3,15 +3,42 @@ module Day01 exposing (..)
 
 eval : String -> String
 eval input =
-    parse input |> always "todo: finish"
+    parse input |> Debug.toString
 
 
-type alias Elf =
-    List Int
+type alias Line =
+    String
 
 
-parse : String -> List Elf
+toLines : String -> List Line
+toLines =
+    String.split "\n"
+
+
+cursedToInt : Line -> Int
+cursedToInt =
+    String.toInt >> Maybe.withDefault 0
+
+
+step : Line -> List Int -> List Int
+step line list =
+    if String.isEmpty line then
+        0 :: list
+
+    else
+        case list of
+            x :: xs ->
+                cursedToInt line + x :: xs
+
+            [] ->
+                cursedToInt line |> List.singleton
+
+
+parse : String -> Int
 parse input =
     String.split "\n" input
-        |> Debug.log "split strings"
-        |> always []
+        |> List.foldl step []
+        |> List.sort
+        |> List.reverse
+        |> List.head
+        |> Maybe.withDefault 0

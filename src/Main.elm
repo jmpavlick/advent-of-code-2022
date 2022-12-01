@@ -12,7 +12,7 @@ type Msg = Msg
 main : Program Flags Model Msg
 main =
     Platform.worker
-        { init = Debug.todo ""
-        , update = Debug.todo ""
-        , subscriptions = Debug.todo ""
+        { init = \_ -> ((), Cmd.none)
+        , update = \_ _ -> ((), Cmd.none)
+        , subscriptions = \_ -> Sub.none
         }

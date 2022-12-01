@@ -10,11 +10,6 @@ type alias Line =
     String
 
 
-toLines : String -> List Line
-toLines =
-    String.split "\n"
-
-
 cursedToInt : Line -> Int
 cursedToInt =
     String.toInt >> Maybe.withDefault 0

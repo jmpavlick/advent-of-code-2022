@@ -1,0 +1,16 @@
+[
+  {
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ]
+  },
+  {
+    "command": [
+      "npm",
+      "run",
+      "eval"
+    ]
+  }
+]

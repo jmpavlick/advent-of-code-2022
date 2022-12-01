@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "elm-go src/Main.elm --no-server -- --output=main.js",
+    "eval": "onchange -i -k 'main.js' 'main.mjs' -- node main.mjs",
+    "start": "run-pty run-pty.json"
   },
   "author": "",
   "license": "ISC",

@@ -1,4 +1,4 @@
-module Day02Part1 exposing (eval)
+module Day02Part1 exposing (Move(..), Outcome(..), eval, play, tupleValues, values)
 
 
 eval : String -> String

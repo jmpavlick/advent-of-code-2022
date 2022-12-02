@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Day01
 import Day02Part1
+import Day02Part2
 
 
 type alias Flags =
@@ -35,6 +36,9 @@ eval { filename, input } =
 
         "Day02Part1.txt" ->
             Day02Part1.eval input
+
+        "Day02Part2.txt" ->
+            Day02Part2.eval input
 
         _ ->
             String.join " " [ "No matching eval for", filename ]

@@ -1,4 +1,4 @@
-module Day02Part1 exposing (eval)
+module Day02Part2 exposing (eval)
 
 
 eval : String -> String
@@ -28,17 +28,26 @@ parse input =
         |> List.map
             (\arr ->
                 case arr of
-                    [ elfLetter, playerLetter ] ->
-                        Just ( elfLetter, playerLetter )
+                    [ elfLetter, outcomeLetter ] ->
+                        Just ( elfLetter, outcomeLetter )
 
                     _ ->
                         Nothing
             )
         |> values
         |> List.map
-            (\( elfLetter, playerLetter ) ->
-                ( letterToMove elfLetter
-                , letterToMove playerLetter
+            (\( elfLetter, outcomeLetter ) ->
+                let
+                    elfMove : Maybe Move
+                    elfMove =
+                        letterToMove elfLetter
+
+                    desiredOutcome : Maybe Outcome
+                    desiredOutcome =
+                        letterToOutcome outcomeLetter
+                in
+                ( elfMove
+                , Maybe.map2 (\e o -> throwTheGame ( e, o )) elfMove desiredOutcome
                 )
                     |> tupleValues
             )
@@ -57,17 +66,49 @@ letterToMove input =
         "C" ->
             Just Scissors
 
+        _ ->
+            Nothing
+
+
+letterToOutcome : String -> Maybe Outcome
+letterToOutcome input =
+    case input of
         "X" ->
-            Just Rock
+            Just Lose
 
         "Y" ->
-            Just Paper
+            Just Draw
 
         "Z" ->
-            Just Scissors
+            Just Win
 
         _ ->
             Nothing
+
+
+throwTheGame : ( Move, Outcome ) -> Move
+throwTheGame ( elf, outcome ) =
+    case ( elf, outcome ) of
+        ( Rock, Win ) ->
+            Paper
+
+        ( Rock, Lose ) ->
+            Scissors
+
+        ( Paper, Lose ) ->
+            Rock
+
+        ( Paper, Win ) ->
+            Scissors
+
+        ( Scissors, Lose ) ->
+            Paper
+
+        ( Scissors, Win ) ->
+            Rock
+
+        ( a, Draw ) ->
+            a
 
 
 tupleValues : ( Maybe a, Maybe a ) -> Maybe ( a, a )

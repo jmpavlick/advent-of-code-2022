@@ -1,6 +1,7 @@
 module Day02Part2 exposing (eval)
 
-import Day02Part1 exposing (Move(..), Outcome(..), play, tupleValues, values)
+import Day02Part1 exposing (Move(..), Outcome(..), play)
+import Util
 
 
 eval : String -> String
@@ -24,7 +25,7 @@ parse input =
                     _ ->
                         Nothing
             )
-        |> values
+        |> Util.values
         |> List.map
             (\( elfLetter, outcomeLetter ) ->
                 let
@@ -39,9 +40,9 @@ parse input =
                 ( elfMove
                 , Maybe.map2 (\e o -> throwTheGame ( e, o )) elfMove desiredOutcome
                 )
-                    |> tupleValues
+                    |> Util.tupleValues
             )
-        |> values
+        |> Util.values
 
 
 letterToMove : String -> Maybe Move

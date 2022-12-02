@@ -1,4 +1,6 @@
-module Day02Part1 exposing (Move(..), Outcome(..), eval, play, tupleValues, values)
+module Day02Part1 exposing (Move(..), Outcome(..), eval, play)
+
+import Util
 
 
 eval : String -> String
@@ -34,15 +36,15 @@ parse input =
                     _ ->
                         Nothing
             )
-        |> values
+        |> Util.values
         |> List.map
             (\( elfLetter, playerLetter ) ->
                 ( letterToMove elfLetter
                 , letterToMove playerLetter
                 )
-                    |> tupleValues
+                    |> Util.tupleValues
             )
-        |> values
+        |> Util.values
 
 
 letterToMove : String -> Maybe Move
@@ -68,16 +70,6 @@ letterToMove input =
 
         _ ->
             Nothing
-
-
-tupleValues : ( Maybe a, Maybe a ) -> Maybe ( a, a )
-tupleValues ( ma, mb ) =
-    Maybe.map2 (\x y -> ( x, y )) ma mb
-
-
-values : List (Maybe a) -> List a
-values =
-    List.filterMap Basics.identity
 
 
 play : ( Move, Move ) -> Int

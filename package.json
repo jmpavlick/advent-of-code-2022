@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "elm-go src/Main.elm --no-server -- --output=main.js",
-    "eval": "onchange -i -k 'main.js' 'main.mjs' -- node main.mjs",
+    "eval": "onchange -i -k 'main.js' 'main.mjs' 'input/*' -- node main.mjs",
     "start": "run-pty run-pty.json"
   },
   "author": "",

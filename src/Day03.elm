@@ -14,24 +14,69 @@ eval input =
 
 
 part2 : String -> String
-part2 =
-    always "todo"
+part2 input =
+    Util.lines input
+        |> group
+        |> List.map threeWayCompare
+        |> Util.values
+        |> List.map priorityMap
+        |> List.foldl (+) 0
+        |> String.fromInt
+
+
+group : List String -> List ( List Char, List Char, List Char )
+group input =
+    case input of
+        a :: b :: c :: xs ->
+            ( String.toList a
+            , String.toList b
+            , String.toList c
+            )
+                :: group xs
+
+        _ ->
+            []
+
+
+threeWayCompare : ( List Char, List Char, List Char ) -> Maybe Char
+threeWayCompare ( a, b, c ) =
+    findMatches ( a, b )
+        |> Tuple.pair c
+        |> findMatch
+
+
+findMatches : ( List Char, List Char ) -> List Char
+findMatches ( a, b ) =
+    let
+        step : Char -> List Char -> List Char
+        step current state =
+            if List.member current a then
+                current :: state
+
+            else
+                state
+    in
+    List.foldl step [] b
+
+
+
+{---------------------------------------- ----------------------------------------}
 
 
 part1 : String -> String
 part1 input =
+    -- break input into lines
     Util.lines input
-        -- break input into lines
-        |> List.map compartments
         -- map each line to compartments
-        |> List.map findMatch
+        |> List.map compartments
         -- find the match for each compartment
+        |> List.map findMatch
+        -- convert  List (Maybe a) -> List a
         |> Util.values
-        -- List (Maybe a) -> List a
-        |> List.map priorityMap
         -- map each match to its priority value
-        |> List.foldl (+) 0
+        |> List.map priorityMap
         -- sum them
+        |> List.foldl (+) 0
         |> String.fromInt
 
 

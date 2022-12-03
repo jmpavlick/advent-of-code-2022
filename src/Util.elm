@@ -24,3 +24,13 @@ tupleValues ( ma, mb ) =
 joinWords : List String -> String
 joinWords =
     String.join " "
+
+
+listToMaybe : List a -> Maybe a
+listToMaybe list =
+    case list of
+        [ a ] ->
+            Just a
+
+        _ ->
+            Nothing

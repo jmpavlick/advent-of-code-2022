@@ -21,3 +21,26 @@ part2 =
 part1 : String -> String
 part1 =
     always "todo"
+
+
+{-| 'a' - 'z' are 1 - 26
+'A' - 'Z' are 27 - 52
+-}
+priorityMap : Char -> Int
+priorityMap char =
+    let
+        lowerOffset : Int
+        lowerOffset =
+            Char.toCode 'a' - 1
+
+        upperOffset : Int
+        upperOffset =
+            Char.toCode 'A' - 27
+    in
+    Char.toCode char
+        - (if Char.isLower char then
+            lowerOffset
+
+           else
+            upperOffset
+          )

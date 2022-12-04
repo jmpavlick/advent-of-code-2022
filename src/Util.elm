@@ -34,3 +34,8 @@ listToMaybe list =
 
         _ ->
             Nothing
+
+
+sum : List number -> number
+sum =
+    List.foldl (+) 0

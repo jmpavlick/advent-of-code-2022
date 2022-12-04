@@ -15,12 +15,18 @@ eval input =
 
 part2 : String -> String
 part2 input =
+    -- break input into lines
     Util.lines input
+        -- group into threes
         |> group
+        -- compare all 3 elements in each group
         |> List.map threeWayCompare
+        -- convert List (Maybe a) to List a
         |> Util.values
+        -- map each match to its priority value
         |> List.map priorityMap
-        |> List.foldl (+) 0
+        -- sum them
+        |> Util.sum
         |> String.fromInt
 
 
@@ -71,12 +77,12 @@ part1 input =
         |> List.map compartments
         -- find the match for each compartment
         |> List.map findMatch
-        -- convert  List (Maybe a) -> List a
+        -- convert  List (Maybe a) to List a
         |> Util.values
         -- map each match to its priority value
         |> List.map priorityMap
         -- sum them
-        |> List.foldl (+) 0
+        |> Util.sum
         |> String.fromInt
 
 

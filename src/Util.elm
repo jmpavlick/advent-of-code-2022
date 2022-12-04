@@ -16,6 +16,11 @@ values =
     List.filterMap Basics.identity
 
 
+results : List (Result x a) -> List a
+results =
+    List.filterMap Result.toMaybe
+
+
 tupleValues : ( Maybe a, Maybe a ) -> Maybe ( a, a )
 tupleValues ( ma, mb ) =
     Maybe.map2 (\x y -> ( x, y )) ma mb

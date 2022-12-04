@@ -44,7 +44,7 @@ pairsPartiallyOverlap ( ( a, b ), ( x, y ) ) =
         xy =
             List.range x y
     in
-    isIn ab xy || isIn xy ab
+    Util.crossOr isIn ab xy
 
 
 isIn : List a -> List a -> Bool
@@ -86,7 +86,25 @@ toPairs input =
 
 pairsFullyOverlap : ( ( Int, Int ), ( Int, Int ) ) -> Bool
 pairsFullyOverlap ( ( a, b ), ( x, y ) ) =
-    (a <= x && b >= y) || (x <= a && y >= b)
+    let
+        ab : List Int
+        ab =
+            List.range a b
+
+        xy : List Int
+        xy =
+            List.range x y
+    in
+    Util.crossOr allAreIn ab xy
+
+
+allAreIn : List a -> List a -> Bool
+allAreIn a b =
+    List.all
+        (\val ->
+            List.member val b
+        )
+        a
 
 
 parser : Parser ( ( Int, Int ), ( Int, Int ) )

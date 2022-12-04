@@ -44,3 +44,20 @@ listToMaybe list =
 sum : List number -> number
 sum =
     List.foldl (+) 0
+
+
+cross : (a -> a -> b) -> a -> a -> ( b, b )
+cross f x y =
+    ( f x y
+    , f y x
+    )
+
+
+crossAnd : (a -> a -> Bool) -> a -> a -> Bool
+crossAnd f a b =
+    cross f a b |> (\( x, y ) -> x && y)
+
+
+crossOr : (a -> a -> Bool) -> a -> a -> Bool
+crossOr f a b =
+    cross f a b |> (\( x, y ) -> x || y)

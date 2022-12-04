@@ -53,11 +53,6 @@ cross f x y =
     )
 
 
-crossAnd : (a -> a -> Bool) -> a -> a -> Bool
-crossAnd f a b =
-    cross f a b |> (\( x, y ) -> x && y)
-
-
 crossOr : (a -> a -> Bool) -> a -> a -> Bool
 crossOr f a b =
     cross f a b |> (\( x, y ) -> x || y)

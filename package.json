@@ -6,16 +6,16 @@
   "scripts": {
     "build": "elm-go src/Main.elm --no-server -- --output=main.js",
     "eval": "onchange -i -k 'main.js' 'main.mjs' 'input/*' -- node main.mjs",
-    "start": "run-pty run-pty.json"
+    "start": "concurrently 'npm run build' 'npm run eval'"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "concurrently": "^7.6.0",
     "elm": "^0.19.1-5",
     "elm-format": "^0.8.5",
     "elm-go": "^5.0.19",
     "fs": "^0.0.1-security",
-    "onchange": "^7.1.0",
-    "run-pty": "^4.0.3"
+    "onchange": "^7.1.0"
   }
 }

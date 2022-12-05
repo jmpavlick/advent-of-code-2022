@@ -56,3 +56,22 @@ cross f x y =
 crossOr : (a -> a -> Bool) -> a -> a -> Bool
 crossOr f a b =
     cross f a b |> (\( x, y ) -> x || y)
+
+
+elemAt : Int -> List a -> Maybe a
+elemAt index list =
+    List.indexedMap Tuple.pair list
+        |> List.filterMap
+            (\( i, elem ) ->
+                if i == index then
+                    Just elem
+
+                else
+                    Nothing
+            )
+        |> List.head
+
+
+flip : (b -> a -> c) -> a -> b -> c
+flip f a b =
+    f b a

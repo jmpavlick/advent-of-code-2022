@@ -1,5 +1,6 @@
 module Day05 exposing (..)
 
+import Array exposing (Array)
 import Parser exposing ((|.), (|=), Parser)
 import Util
 
@@ -30,20 +31,103 @@ part1 input =
         lines =
             Util.lines input
 
-        crateLinesTodo : List (List String)
-        crateLinesTodo =
+        pileOfCrates : PileOfCrates
+        pileOfCrates =
             List.map parseCrateLine lines
                 |> List.map Util.results
                 |> List.filter (\list -> List.length list > 0)
                 |> rotate
                 |> List.map Util.values
+                |> List.map Array.fromList
+                |> Array.fromList
 
         instructions : List Instruction
         instructions =
             List.map parseInstruction lines
                 |> Util.results
+
+        testArray =
+            Array.fromList [ Array.fromList [ "a", "b" ], Array.fromList [ "c", "d" ], Array.fromList [ "e", "f" ] ]
+
+        testUpdateAtIndex =
+            updateAtIndex 2 (Array.fromList [ "z" ]) testArray
     in
-    Debug.toString crateLinesTodo
+    List.foldl moveCrate pileOfCrates instructions
+        |> getMessage
+
+
+getMessage : PileOfCrates -> String
+getMessage pile =
+    Array.map Array.toList pile
+        |> Array.toList
+        |> List.map List.head
+        |> Util.values
+        |> String.concat
+        |> Debug.toString
+
+
+moveCrate : Instruction -> PileOfCrates -> PileOfCrates
+moveCrate { move, from, to } pile =
+    let
+        sourceIndex : Int
+        sourceIndex =
+            from - 1
+
+        targetIndex : Int
+        targetIndex =
+            to - 1
+    in
+    case Array.get sourceIndex pile of
+        Nothing ->
+            pile
+
+        Just crates ->
+            takeCrates move crates
+                |> (\{ leftovers, flippedToMove } ->
+                        updateAtIndex sourceIndex leftovers pile
+                            |> (\newPile ->
+                                    case Array.get targetIndex newPile of
+                                        Nothing ->
+                                            newPile
+
+                                        Just newCrates ->
+                                            updateAtIndex targetIndex (Array.append flippedToMove newCrates) newPile
+                               )
+                   )
+
+
+takeCrates : Int -> Array String -> { leftovers : Array String, flippedToMove : Array String }
+takeCrates count crates =
+    { leftovers = Array.slice count (Array.length crates) crates
+    , flippedToMove =
+        if count == 0 then
+            Array.empty
+
+        else
+            Array.slice 0 count crates |> Array.toList |> List.reverse |> Array.fromList
+    }
+
+
+updateAtIndex : Int -> Array String -> PileOfCrates -> PileOfCrates
+updateAtIndex index newPile crates =
+    let
+        pilesBefore : PileOfCrates
+        pilesBefore =
+            if index == 0 then
+                Array.empty
+
+            else
+                Array.slice 0 index crates
+
+        pilesAfter : PileOfCrates
+        pilesAfter =
+            Array.slice (index + 1) (Array.length crates) crates
+    in
+    Array.append (Array.append pilesBefore (Array.fromList [ newPile ])) pilesAfter
+
+
+type alias PileOfCrates =
+    Array (Array String)
 
 
 type alias Instruction =
@@ -55,10 +139,6 @@ type alias Instruction =
 
 type alias Crate =
     Maybe String
-
-
-
---parseCrateLine : String -> List Crate
 
 
 parseCrateLine : String -> List (Result (List Parser.DeadEnd) Crate)
@@ -113,15 +193,6 @@ crateParser =
                 |. Parser.chompIf Char.isAlpha
                 |. Parser.symbol "]"
         ]
-
-
-nx : List (List String)
-nx =
-    [ [ "a", "b", "c", "d" ]
-    , [ "e", "f", "g", "h" ]
-    , [ "i", "j", "k", "l" ]
-    , [ "m", "n", "o", "p" ]
-    ]
 
 
 step : List a -> ( List a, List (List a) ) -> ( List a, List (List a) )

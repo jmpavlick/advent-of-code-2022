@@ -25,4 +25,135 @@ part2 input =
 
 part1 : String -> String
 part1 input =
-    "TODO"
+    let
+        lines : List String
+        lines =
+            Util.lines input
+
+        crateLinesTodo : List (List String)
+        crateLinesTodo =
+            List.map parseCrateLine lines
+                |> List.map Util.results
+                |> List.filter (\list -> List.length list > 0)
+                |> rotate
+                |> List.map Util.values
+
+        instructions : List Instruction
+        instructions =
+            List.map parseInstruction lines
+                |> Util.results
+    in
+    Debug.toString crateLinesTodo
+
+
+type alias Instruction =
+    { move : Int
+    , from : Int
+    , to : Int
+    }
+
+
+type alias Crate =
+    Maybe String
+
+
+
+--parseCrateLine : String -> List Crate
+
+
+parseCrateLine : String -> List (Result (List Parser.DeadEnd) Crate)
+parseCrateLine input =
+    case String.toList input of
+        a :: b :: c :: xs ->
+            -- List.drop 1 xs removes the separating whitespace
+            (String.fromList [ a, b, c ]
+                |> Parser.run crateParser
+            )
+                :: parseCrateLine (List.drop 1 xs |> String.fromList)
+
+        _ ->
+            []
+
+
+parseInstruction : String -> Result (List Parser.DeadEnd) Instruction
+parseInstruction =
+    Parser.run <|
+        Parser.succeed Instruction
+            |. Parser.chompWhile Char.isAlpha
+            |. Parser.symbol " "
+            |= Parser.int
+            |. Parser.symbol " "
+            |. Parser.chompWhile Char.isAlpha
+            |. Parser.symbol " "
+            |= Parser.int
+            |. Parser.symbol " "
+            |. Parser.chompWhile Char.isAlpha
+            |. Parser.symbol " "
+            |= Parser.int
+
+
+crateParser : Parser (Maybe String)
+crateParser =
+    Parser.oneOf
+        [ Parser.succeed Nothing
+            |. Parser.symbol " "
+            |. Parser.symbol " "
+            |. Parser.symbol " "
+        , (Parser.getChompedString
+            >> Parser.map
+                (String.toList
+                    >> List.filter Char.isAlpha
+                    >> String.fromList
+                    >> Just
+                )
+          )
+          <|
+            Parser.succeed ()
+                |. Parser.symbol "["
+                |. Parser.chompIf Char.isAlpha
+                |. Parser.symbol "]"
+        ]
+
+
+nx : List (List String)
+nx =
+    [ [ "a", "b", "c", "d" ]
+    , [ "e", "f", "g", "h" ]
+    , [ "i", "j", "k", "l" ]
+    , [ "m", "n", "o", "p" ]
+    ]
+
+
+step : List a -> ( List a, List (List a) ) -> ( List a, List (List a) )
+step list ( accHeads, accTails ) =
+    case list of
+        [] ->
+            ( accHeads, accTails )
+
+        x :: xs ->
+            ( x :: accHeads, xs :: accTails )
+
+
+separate : List (List a) -> ( List a, List (List a) )
+separate input =
+    List.foldr step ( [], [] ) input
+
+
+recurse : ( List a, List (List a) ) -> List (List a)
+recurse ( x, xs ) =
+    case xs of
+        [] ->
+            []
+
+        exess ->
+            case x of
+                [] ->
+                    separate exess |> recurse
+
+                ex ->
+                    ex :: (separate exess |> recurse)
+
+
+rotate : List (List a) -> List (List a)
+rotate input =
+    recurse ( [], input )

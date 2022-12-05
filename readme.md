@@ -7,6 +7,4 @@ npm install
 npm run start
 ```
 
-will build and run the latest solve.
-
 :sparkles:

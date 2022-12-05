@@ -45,12 +45,6 @@ part1 input =
         instructions =
             List.map parseInstruction lines
                 |> Util.results
-
-        testArray =
-            Array.fromList [ Array.fromList [ "a", "b" ], Array.fromList [ "c", "d" ], Array.fromList [ "e", "f" ] ]
-
-        testUpdateAtIndex =
-            updateAtIndex 2 (Array.fromList [ "z" ]) testArray
     in
     List.foldl moveCrate pileOfCrates instructions
         |> getMessage

@@ -46,7 +46,7 @@ part1 input =
             List.map parseInstruction lines
                 |> Util.results
     in
-    List.foldl moveCrate pileOfCrates instructions
+    List.foldl (moveCrate flipCrates) pileOfCrates instructions
         |> getMessage
 
 
@@ -60,8 +60,8 @@ getMessage pile =
         |> Debug.toString
 
 
-moveCrate : Instruction -> PileOfCrates -> PileOfCrates
-moveCrate { move, from, to } pile =
+moveCrate : CrateMover -> Instruction -> PileOfCrates -> PileOfCrates
+moveCrate crateMover { move, from, to } pile =
     let
         sourceIndex : Int
         sourceIndex =
@@ -76,8 +76,8 @@ moveCrate { move, from, to } pile =
             pile
 
         Just crates ->
-            takeCrates move crates
-                |> (\{ leftovers, flippedToMove } ->
+            takeCrates crateMover move crates
+                |> (\{ leftovers, toMove } ->
                         updateAtIndex sourceIndex leftovers pile
                             |> (\newPile ->
                                     case Array.get targetIndex newPile of
@@ -85,21 +85,30 @@ moveCrate { move, from, to } pile =
                                             newPile
 
                                         Just newCrates ->
-                                            updateAtIndex targetIndex (Array.append flippedToMove newCrates) newPile
+                                            updateAtIndex targetIndex (Array.append toMove newCrates) newPile
                                )
                    )
 
 
-takeCrates : Int -> Array String -> { leftovers : Array String, flippedToMove : Array String }
-takeCrates count crates =
+takeCrates : CrateMover -> Int -> Array String -> { leftovers : Array String, toMove : Array String }
+takeCrates crateMover count crates =
     { leftovers = Array.slice count (Array.length crates) crates
-    , flippedToMove =
+    , toMove =
         if count == 0 then
             Array.empty
 
         else
-            Array.slice 0 count crates |> Array.toList |> List.reverse |> Array.fromList
+            Array.slice 0 count crates |> crateMover
     }
+
+
+type alias CrateMover =
+    Array String -> Array String
+
+
+flipCrates : CrateMover
+flipCrates =
+    Array.toList >> List.reverse >> Array.fromList
 
 
 updateAtIndex : Int -> Array String -> PileOfCrates -> PileOfCrates

@@ -17,7 +17,28 @@ eval input =
 
 part2 : String -> String
 part2 input =
-    "TODO"
+    let
+        lines : List String
+        lines =
+            Util.lines input
+
+        pileOfCrates : PileOfCrates
+        pileOfCrates =
+            List.map parseCrateLine lines
+                |> List.map Util.results
+                |> List.filter (\list -> List.length list > 0)
+                |> rotate
+                |> List.map Util.values
+                |> List.map Array.fromList
+                |> Array.fromList
+
+        instructions : List Instruction
+        instructions =
+            List.map parseInstruction lines
+                |> Util.results
+    in
+    List.foldl (moveCrate Basics.identity) pileOfCrates instructions
+        |> getMessage
 
 
 

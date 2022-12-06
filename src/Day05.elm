@@ -252,3 +252,41 @@ recurse ( x, xs ) =
 rotate : List (List a) -> List (List a)
 rotate input =
     recurse ( [], input )
+
+
+
+--
+
+
+transpose : List (List a) -> List (List a)
+transpose listOfLists =
+    let
+        fstep : List a -> List (List a) -> List (List a)
+        fstep =
+            List.map2
+                (\xs xxs ->
+                    xs :: xxs
+                )
+
+        init : List (List a)
+        init =
+            List.repeat (rowsLength listOfLists) []
+    in
+    List.foldr fstep init listOfLists
+
+
+rowsLength : List (List a) -> Int
+rowsLength listOfLists =
+    case listOfLists of
+        [] ->
+            0
+
+        x :: _ ->
+            List.length x
+
+
+nx =
+    [ [ "a", "b", "c", "d" ]
+    , [ "e", "f", "g", "h" ]
+    , [ "i", "j", "k", "l" ]
+    ]

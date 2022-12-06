@@ -75,3 +75,13 @@ elemAt index list =
 flip : (b -> a -> c) -> a -> b -> c
 flip f a b =
     f b a
+
+
+template : (String -> String) -> (String -> String) -> String -> String
+template part1 part2 input =
+    joinWords
+        [ "part 1: "
+        , part1 input
+        , "; part 2: "
+        , part2 input
+        ]

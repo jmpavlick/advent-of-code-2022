@@ -12,7 +12,49 @@ eval input =
 
 part2 : String -> String
 part2 input =
-    "TODO"
+    let
+        filesystem : Filesystem
+        filesystem =
+            runInputParser input
+                |> (\ecos -> initFilesystem [] ecos Dict.empty)
+
+        allDirectorySizes : List Int
+        allDirectorySizes =
+            sumAllDirectories filesystem
+
+        outermostDirectorySize : Int
+        outermostDirectorySize =
+            getOutermostDirectorySize allDirectorySizes
+                |> Maybe.withDefault 0
+
+        currentFreeSpace : Int
+        currentFreeSpace =
+            totalFilesystemSize - outermostDirectorySize
+
+        candidateDirectorySizes : List Int
+        candidateDirectorySizes =
+            List.filter (\size -> size >= neededFreeSpace - currentFreeSpace) allDirectorySizes
+
+        smallestDirectorySize : Int
+        smallestDirectorySize =
+            List.sort candidateDirectorySizes |> List.head |> Maybe.withDefault 0
+    in
+    smallestDirectorySize |> Debug.toString
+
+
+getOutermostDirectorySize : List Int -> Maybe Int
+getOutermostDirectorySize directories =
+    List.sort directories |> List.reverse |> List.head
+
+
+totalFilesystemSize : Int
+totalFilesystemSize =
+    70000000
+
+
+neededFreeSpace : Int
+neededFreeSpace =
+    30000000
 
 
 

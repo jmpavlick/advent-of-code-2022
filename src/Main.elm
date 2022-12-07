@@ -7,6 +7,7 @@ import Day03
 import Day04
 import Day05
 import Day06
+import Day07
 
 
 type alias Flags =
@@ -55,6 +56,9 @@ eval { filename, input } =
 
         "Day06.txt" ->
             Day06.eval input
+
+        "Day07.txt" ->
+            Day07.eval input
 
         _ ->
             String.join " " [ "No matching eval for", filename ]

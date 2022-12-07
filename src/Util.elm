@@ -1,5 +1,7 @@
 module Util exposing (..)
 
+import Parser exposing ((|.), (|=), Parser)
+
 
 lines : String -> List String
 lines =
@@ -84,4 +86,19 @@ template part1 part2 input =
         , part1 input
         , "; part 2: "
         , part2 input
+        ]
+
+
+type Either a b
+    = Left a
+    | Right b
+
+
+parseEither : Parser a -> Parser b -> Parser (Either a b)
+parseEither pa pb =
+    Parser.oneOf
+        [ Parser.succeed Left
+            |= pa
+        , Parser.succeed Right
+            |= pb
         ]

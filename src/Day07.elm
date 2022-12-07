@@ -35,10 +35,10 @@ part2 input =
 part1 : String -> String
 part1 input =
     runInputParser input
-        |> List.foldl update ( [], Dict.empty )
-        --|> Tuple.second
-        -- >> sumAtAllPaths
-        --|> List.filter (\x -> x < 10000)
+        |> (\ecos -> initFilesystem [] ecos Dict.empty)
+        |> sumAllDirectories
+        |> List.filter (\x -> x <= 100000)
+        |> List.sum
         |> Debug.toString
 
 
@@ -53,50 +53,9 @@ type Output
     | Directory String
 
 
-type FsNode
-    = F Int
-    | D (List String) (List FsNode)
-
-
-sumFsNode : FsNode -> Int
-sumFsNode node =
-    case node of
-        F i ->
-            i
-
-        D _ [] ->
-            0
-
-        D path (x :: xs) ->
-            sumFsNode x + sumFsNode (D path xs)
-
-
 runInputParser : String -> List (Either Command Output)
 runInputParser =
     Util.lines >> List.map (Parser.run parseInput) >> Util.results
-
-
-
-{-
-   group : List String -> List (Either Command Output) -> List ()
-   group path eco =
-       case eco of
-           [] ->
-               Debug.todo ""
-
-           x :: xs ->
-               case x of
-                   Left command ->
-                       case command of
-                           CdIn dir ->
-                               group (dir :: path) xs
-
-                           Ls ->
-                               group path xs
-
-                   Right output ->
-                       Debug.todo ""
--}
 
 
 parseInput : Parser (Either Command Output)
@@ -111,7 +70,7 @@ parseCommand =
             |. Parser.keyword "$ cd .."
         , Parser.succeed Ls
             |. Parser.keyword "$ ls"
-        , Parser.map CdIn <|
+        , Parser.map (\x -> String.replace "$ cd " "" x |> CdIn) <|
             Parser.getChompedString <|
                 Parser.succeed ()
                     |. Parser.keyword "$ cd"
@@ -123,7 +82,7 @@ parseCommand =
 parseOutput : Parser Output
 parseOutput =
     Parser.oneOf
-        [ Parser.map Directory <|
+        [ Parser.map (\x -> String.replace "dir " "" x |> Directory) <|
             Parser.getChompedString <|
                 Parser.succeed ()
                     |. Parser.keyword "dir"
@@ -134,92 +93,77 @@ parseOutput =
         ]
 
 
-
----- i am ggoing nuts
-
-
 type alias Filesystem =
-    Dict String (List (Either String Int))
+    Dict String ( List String, List Int )
 
 
-type alias DictNode =
-    ( List String, Filesystem )
-
-
-update : Either Command Output -> DictNode -> DictNode
-update eco dictNode =
-    case eco of
-        Left command ->
-            updateCommand command dictNode
-
-        Right output ->
-            updateOutput output dictNode
-
-
-updateCommand : Command -> DictNode -> DictNode
-updateCommand cmd ( cwd, filesystem ) =
-    case cmd of
-        CdIn dir ->
-            ( dir :: cwd, filesystem )
-
-        CdOut ->
-            case cwd of
-                [] ->
-                    ( [], filesystem )
-
-                x :: xs ->
-                    ( xs, filesystem )
-
-        Ls ->
-            ( cwd, filesystem )
-
-
-updateOutput : Output -> DictNode -> DictNode
-updateOutput out ( cwd, filesystem ) =
+initFilesystem : List String -> List (Either Command Output) -> Filesystem -> Filesystem
+initFilesystem cwd eco filesystem =
     let
-        path : String
-        path =
-            String.concat cwd
-
-        values : List (Either String Int)
-        values =
-            Dict.get path filesystem
-                |> Maybe.withDefault []
-
-        mapOutput : Output -> Either String Int
-        mapOutput o =
-            case o of
-                File i ->
-                    Right i
-
-                Directory d ->
-                    Left d
+        key : String
+        key =
+            String.join "/" cwd
     in
-    ( cwd
-    , Dict.insert path (mapOutput out :: values) filesystem
-    )
-
-
-sumAtPath : Filesystem -> String -> Int
-sumAtPath filesystem path =
-    case Dict.get path filesystem |> Maybe.withDefault [] of
+    case eco of
         [] ->
-            0
+            filesystem
 
         x :: xs ->
             case x of
-                Left dir ->
-                    Dict.insert path xs filesystem
-                        |> Util.flip sumAtPath (dir ++ path)
+                Left command ->
+                    case command of
+                        CdIn str ->
+                            initFilesystem (str :: cwd) xs filesystem
 
-                Right i ->
-                    i
-                        + (Dict.insert path xs filesystem
-                            |> Util.flip sumAtPath path
-                          )
+                        CdOut ->
+                            initFilesystem (List.drop 1 cwd) xs filesystem
+
+                        Ls ->
+                            initFilesystem cwd xs filesystem
+
+                Right output ->
+                    case output of
+                        File filesize ->
+                            addFileAtKey filesize key filesystem
+                                |> initFilesystem cwd xs
+
+                        Directory directory ->
+                            addDirectoryAtKey directory key filesystem
+                                |> initFilesystem cwd xs
 
 
-sumAtAllPaths : Filesystem -> List Int
-sumAtAllPaths filesystem =
+addFileAtKey : Int -> String -> Filesystem -> Filesystem
+addFileAtKey filesize key filesystem =
+    Dict.get key filesystem
+        |> Maybe.map (\( directories, filesizes ) -> ( directories, filesize :: filesizes ))
+        |> Maybe.withDefault ( [], List.singleton filesize )
+        |> (\value -> Dict.insert key value filesystem)
+
+
+addDirectoryAtKey : String -> String -> Filesystem -> Filesystem
+addDirectoryAtKey directory key filesystem =
+    Dict.get key filesystem
+        |> Maybe.map (\( directories, filesizes ) -> ( directory :: directories, filesizes ))
+        |> Maybe.withDefault ( List.singleton directory, [] )
+        |> (\value -> Dict.insert key value filesystem)
+
+
+sumDirectory : String -> Filesystem -> Int
+sumDirectory key filesystem =
+    case Dict.get key filesystem |> Maybe.withDefault ( [], [] ) of
+        ( [], files ) ->
+            Util.sum files
+
+        ( directories, files ) ->
+            Util.sum files
+                + (List.map
+                    (\d -> sumDirectory (d ++ "/" ++ key) filesystem)
+                    directories
+                    |> Util.sum
+                  )
+
+
+sumAllDirectories : Filesystem -> List Int
+sumAllDirectories filesystem =
     Dict.keys filesystem
-        |> List.map (sumAtPath filesystem)
+        |> List.map (\key -> sumDirectory key filesystem)

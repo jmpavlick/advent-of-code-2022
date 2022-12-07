@@ -59,19 +59,6 @@ neededFreeSpace =
 
 
 {---------------------------------------- ----------------------------------------}
-{-
-   [x] define a type to hold our puzzle input
-   [x] write a parser to output values of that type
-   [x] execute that parser over our input
-   [x] define a type to hold the file and directory data as we process it -
-       this is going to be some sort of bi-directional linked list or tree? maybe a stack?
-   [ ] write a function that evaluates our input data
-   [ ] write a function to search our input data
-   [ ] search our input data for values that match our criteria
-   [ ] sum them
-   [ ] print
-
--}
 
 
 part1 : String -> String

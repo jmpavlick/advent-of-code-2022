@@ -15,8 +15,64 @@ part2 input =
     "TODO"
 
 
+type alias Scenic =
+    { a : Int
+    , b : Int
+    , c : Int
+    , d : Int
+    }
 
---scoreScenicFromLeft : List (
+
+initTreeScenic : Int -> Tree Scenic
+initTreeScenic int =
+    ( { a = 0, b = 0, c = 0, d = 0 }, int )
+
+
+incA : Tree Scenic -> Tree Scenic
+incA ( scenic, int ) =
+    ( { scenic | a = scenic.a + 1 }, int )
+
+
+type alias ScenicSelectUpdate =
+    ( Tree Scenic -> Int, Tree Scenic -> Tree Scenic )
+
+
+type alias ScenicUpdate =
+    Scenic -> Int -> Scenic
+
+
+scoreScenicFromLeft : ScenicSelectUpdate -> List (Tree Scenic) -> List (Tree Scenic)
+scoreScenicFromLeft ( selector, update ) input =
+    let
+        step : Tree Scenic -> List (Tree Scenic) -> List (Tree Scenic)
+        step ( scenic, height ) acc =
+            Debug.todo ""
+    in
+    List.foldl step [] input
+        |> List.reverse
+
+
+scoreScenicToRight : ScenicUpdate -> List (Tree Scenic) -> List (Tree Scenic)
+scoreScenicToRight update input =
+    case input of
+        [] ->
+            []
+
+        ( scenic, height ) :: xs ->
+            ( List.map
+                (\( _, xsh ) ->
+                    height > xsh
+                )
+                xs
+                |> Util.takeWhile ((==) True)
+                |> List.length
+                |> update scenic
+            , height
+            )
+                :: scoreScenicToRight update xs
+
+
+
 {---------------------------------------- ----------------------------------------}
 
 

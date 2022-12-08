@@ -112,3 +112,17 @@ rowsLength input =
 
         x :: _ ->
             List.length x
+
+
+takeWhile : (a -> Bool) -> List a -> List a
+takeWhile func list =
+    case list of
+        [] ->
+            []
+
+        x :: xs ->
+            if func x then
+                x :: takeWhile func xs
+
+            else
+                []

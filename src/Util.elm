@@ -97,3 +97,18 @@ parseEither pa pb =
         , Parser.succeed Right
             |= pb
         ]
+
+
+transpose : List (List a) -> List (List a)
+transpose input =
+    List.foldr (List.map2 (::)) (List.repeat (rowsLength input) []) input
+
+
+rowsLength : List (List a) -> Int
+rowsLength input =
+    case input of
+        [] ->
+            0
+
+        x :: _ ->
+            List.length x

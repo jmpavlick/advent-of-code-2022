@@ -16,21 +16,22 @@ part2 input =
 
 
 
+--scoreScenicFromLeft : List (
 {---------------------------------------- ----------------------------------------}
 
 
 part1 : String -> String
 part1 input =
-    parse input
-        |> quadcopter
+    parse input initTreeBool
+        |> quadcopter scoreVisibleFromLeft
         |> countVisible
         |> Debug.toString
 
 
-mapVisibleFromLeft : List Tree -> List Tree
-mapVisibleFromLeft input =
+scoreVisibleFromLeft : List (Tree Bool) -> List (Tree Bool)
+scoreVisibleFromLeft input =
     let
-        step : Tree -> List Tree -> List Tree
+        step : Tree Bool -> List (Tree Bool) -> List (Tree Bool)
         step ( visible, height ) acc =
             ( visible
                 || height
@@ -50,42 +51,42 @@ mapVisibleFromLeft input =
 {- | quadcopter: compute visibility from every angle -}
 
 
-quadcopter : Forest -> Forest
-quadcopter forest =
-    List.map mapVisibleFromLeft forest
+quadcopter : (List (Tree a) -> List (Tree a)) -> Forest a -> Forest a
+quadcopter scoreFunc forest =
+    List.map scoreFunc forest
         |> Debug.log "init"
         |> List.map List.reverse
-        |> List.map mapVisibleFromLeft
+        |> List.map scoreFunc
         |> Debug.log "reversed"
         |> List.map List.reverse
         |> Util.transpose
-        |> List.map mapVisibleFromLeft
+        |> List.map scoreFunc
         |> Debug.log "transposed"
         |> List.map List.reverse
-        |> List.map mapVisibleFromLeft
+        |> List.map scoreFunc
         |> Debug.log "transposed reversed"
 
 
-countVisible : Forest -> Int
+countVisible : Forest Bool -> Int
 countVisible =
     List.concat >> List.filter Tuple.first >> List.length
 
 
-type alias Forest =
-    List (List ( Bool, Int ))
+type alias Forest a =
+    List (List ( a, Int ))
 
 
-type alias Tree =
-    ( Bool, Int )
+type alias Tree a =
+    ( a, Int )
 
 
-initTree : Int -> Tree
-initTree int =
+initTreeBool : Int -> Tree Bool
+initTreeBool int =
     ( False, int )
 
 
-parse : String -> Forest
-parse input =
+parse : String -> (Int -> Tree a) -> Forest a
+parse input init =
     Util.lines input
         |> List.map
             (\line ->
@@ -93,5 +94,5 @@ parse input =
                     |> List.map String.fromChar
                     |> List.map String.toInt
                     |> Util.values
-                    |> List.map initTree
+                    |> List.map init
             )

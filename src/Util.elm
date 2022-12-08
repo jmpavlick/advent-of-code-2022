@@ -43,11 +43,6 @@ listToMaybe list =
             Nothing
 
 
-sum : List number -> number
-sum =
-    List.foldl (+) 0
-
-
 cross : (a -> a -> b) -> a -> a -> ( b, b )
 cross f x y =
     ( f x y

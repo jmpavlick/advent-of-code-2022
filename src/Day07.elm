@@ -181,7 +181,7 @@ sumDirectory : String -> Filesystem -> Int
 sumDirectory key filesystem =
     case Dict.get key filesystem |> Maybe.withDefault ( [], [] ) of
         ( [], files ) ->
-            Util.sum files
+            List.sum files
 
         ( directories, files ) ->
             let

@@ -26,7 +26,7 @@ part2 input =
         -- map each match to its priority value
         |> List.map priorityMap
         -- sum them
-        |> Util.sum
+        |> List.sum
         |> String.fromInt
 
 
@@ -82,7 +82,7 @@ part1 input =
         -- map each match to its priority value
         |> List.map priorityMap
         -- sum them
-        |> Util.sum
+        |> List.sum
         |> String.fromInt
 
 

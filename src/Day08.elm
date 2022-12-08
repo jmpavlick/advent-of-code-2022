@@ -1,7 +1,5 @@
 module Day08 exposing (..)
 
-import Dict exposing (Dict)
-import Parser exposing ((|.), (|=), Parser)
 import Util exposing (Either(..))
 
 
@@ -12,7 +10,11 @@ eval input =
 
 part2 : String -> String
 part2 input =
-    scoreScenicToRight scenicUpdateA [ initTreeScenic 5, initTreeScenic 4, initTreeScenic 6 ]
+    parse input initTreeScenic
+        |> scenicQuadcopter
+        |> List.concat
+        |> List.map calculateScenicScore
+        |> List.maximum
         |> Debug.toString
 
 
@@ -66,20 +68,46 @@ scoreScenicToRight update input =
                 )
                 xs
                 -- at least one tree is visible, even if it's taller than us, as long as it has a neighbor
-                |> (\bools ->
-                        case List.reverse bools of
-                            [] ->
-                                []
-
-                            _ :: bs ->
-                                True :: bs |> List.reverse
-                   )
-                |> Util.takeWhile ((==) True)
+                |> oneMoreTrue
                 |> List.length
                 |> update scenic
             , height
             )
                 :: scoreScenicToRight update xs
+
+
+oneMoreTrue : List Bool -> List Bool
+oneMoreTrue list =
+    case list of
+        [] ->
+            []
+
+        x :: xs ->
+            if x then
+                True :: oneMoreTrue xs
+
+            else
+                True :: []
+
+
+scenicQuadcopter : Forest Scenic -> Forest Scenic
+scenicQuadcopter forest =
+    List.map (scoreScenicToRight scenicUpdateA) forest
+        --|> Debug.log "init"
+        |> List.map List.reverse
+        |> List.map (scoreScenicToRight scenicUpdateB)
+        --|> Debug.log "reversed"
+        |> List.map List.reverse
+        |> Util.transpose
+        |> List.map (scoreScenicToRight scenicUpdateC)
+        --|> Debug.log "transposed"
+        |> List.map List.reverse
+        |> List.map (scoreScenicToRight scenicUpdateD)
+
+
+calculateScenicScore : Tree Scenic -> Int
+calculateScenicScore ( { a, b, c, d }, _ ) =
+    a * b * c * d
 
 
 
@@ -89,7 +117,7 @@ scoreScenicToRight update input =
 part1 : String -> String
 part1 input =
     parse input initTreeBool
-        |> quadcopter scoreVisibleFromLeft
+        |> boolQuadcopter scoreVisibleFromLeft
         |> countVisible
         |> Debug.toString
 
@@ -113,12 +141,10 @@ scoreVisibleFromLeft input =
         |> List.reverse
 
 
-
-{- | quadcopter: compute visibility from every angle -}
-
-
-quadcopter : (List (Tree a) -> List (Tree a)) -> Forest a -> Forest a
-quadcopter scoreFunc forest =
+{-| boolQuadcopter: compute visibility from every angle
+-}
+boolQuadcopter : (List (Tree a) -> List (Tree a)) -> Forest a -> Forest a
+boolQuadcopter scoreFunc forest =
     List.map scoreFunc forest
         --|> Debug.log "init"
         |> List.map List.reverse

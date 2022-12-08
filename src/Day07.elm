@@ -184,12 +184,12 @@ sumDirectory key filesystem =
             Util.sum files
 
         ( directories, files ) ->
-            Util.sum files
-                + (List.map
-                    (\d -> sumDirectory (d ++ "/" ++ key) filesystem)
-                    directories
-                    |> Util.sum
-                  )
+            let
+                step : Filesystem -> String -> Int -> Int
+                step fs k acc =
+                    acc + sumDirectory (k ++ "/" ++ key) fs
+            in
+            List.foldl (step filesystem) (List.sum files) directories
 
 
 sumAllDirectories : Filesystem -> List Int

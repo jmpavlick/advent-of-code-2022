@@ -12,7 +12,8 @@ eval input =
 
 part2 : String -> String
 part2 input =
-    "TODO"
+    scoreScenicToRight scenicUpdateA [ initTreeScenic 5, initTreeScenic 4, initTreeScenic 6 ]
+        |> Debug.toString
 
 
 type alias Scenic =
@@ -24,27 +25,32 @@ type alias Scenic =
 
 
 initTreeScenic : Int -> Tree Scenic
-initTreeScenic int =
-    ( { a = 0, b = 0, c = 0, d = 0 }, int )
-
-
-type alias ScenicSelectUpdate =
-    ( Tree Scenic -> Int, Tree Scenic -> Tree Scenic )
+initTreeScenic value =
+    ( { a = 0, b = 0, c = 0, d = 0 }, value )
 
 
 type alias ScenicUpdate =
     Scenic -> Int -> Scenic
 
 
-scoreScenicFromLeft : ScenicSelectUpdate -> List (Tree Scenic) -> List (Tree Scenic)
-scoreScenicFromLeft ( selector, update ) input =
-    let
-        step : Tree Scenic -> List (Tree Scenic) -> List (Tree Scenic)
-        step ( scenic, height ) acc =
-            Debug.todo ""
-    in
-    List.foldl step [] input
-        |> List.reverse
+scenicUpdateA : ScenicUpdate
+scenicUpdateA scenic value =
+    { scenic | a = value }
+
+
+scenicUpdateB : ScenicUpdate
+scenicUpdateB scenic value =
+    { scenic | b = value }
+
+
+scenicUpdateC : ScenicUpdate
+scenicUpdateC scenic value =
+    { scenic | c = value }
+
+
+scenicUpdateD : ScenicUpdate
+scenicUpdateD scenic value =
+    { scenic | d = value }
 
 
 scoreScenicToRight : ScenicUpdate -> List (Tree Scenic) -> List (Tree Scenic)
@@ -61,12 +67,12 @@ scoreScenicToRight update input =
                 xs
                 -- at least one tree is visible, even if it's taller than us, as long as it has a neighbor
                 |> (\bools ->
-                        case bools of
+                        case List.reverse bools of
                             [] ->
                                 []
 
                             _ :: bs ->
-                                True :: bs
+                                True :: bs |> List.reverse
                    )
                 |> Util.takeWhile ((==) True)
                 |> List.length
@@ -114,17 +120,20 @@ scoreVisibleFromLeft input =
 quadcopter : (List (Tree a) -> List (Tree a)) -> Forest a -> Forest a
 quadcopter scoreFunc forest =
     List.map scoreFunc forest
-        |> Debug.log "init"
+        --|> Debug.log "init"
         |> List.map List.reverse
         |> List.map scoreFunc
-        |> Debug.log "reversed"
+        --|> Debug.log "reversed"
         |> List.map List.reverse
         |> Util.transpose
         |> List.map scoreFunc
-        |> Debug.log "transposed"
+        --|> Debug.log "transposed"
         |> List.map List.reverse
         |> List.map scoreFunc
-        |> Debug.log "transposed reversed"
+
+
+
+--|> Debug.log "transposed reversed"
 
 
 countVisible : Forest Bool -> Int

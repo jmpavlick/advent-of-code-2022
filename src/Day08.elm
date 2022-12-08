@@ -28,11 +28,6 @@ initTreeScenic int =
     ( { a = 0, b = 0, c = 0, d = 0 }, int )
 
 
-incA : Tree Scenic -> Tree Scenic
-incA ( scenic, int ) =
-    ( { scenic | a = scenic.a + 1 }, int )
-
-
 type alias ScenicSelectUpdate =
     ( Tree Scenic -> Int, Tree Scenic -> Tree Scenic )
 
@@ -64,6 +59,15 @@ scoreScenicToRight update input =
                     height > xsh
                 )
                 xs
+                -- at least one tree is visible, even if it's taller than us, as long as it has a neighbor
+                |> (\bools ->
+                        case bools of
+                            [] ->
+                                []
+
+                            _ :: bs ->
+                                True :: bs
+                   )
                 |> Util.takeWhile ((==) True)
                 |> List.length
                 |> update scenic

@@ -21,19 +21,47 @@ part2 input =
 
 part1 : String -> String
 part1 input =
-    List.map isDiagonal
+    List.map (\x -> ( x, holdTail x ))
         [ { head = ( 0, 0 )
-          , tail = ( 1, 1 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( 0, 1 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( 1, 1 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( 1, 0 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( 1, -1 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( 0, -1 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( -1, -1 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( -1, 0 )
+          , tail = ( 0, 0 )
+          }
+        , { head = ( -1, 1 )
+          , tail = ( 0, 0 )
           }
         ]
         |> Debug.toString
 
 
-type Move
-    = Up Int
-    | Right Int
-    | Left Int
-    | Down Int
+type alias Move =
+    ( Direction, Int )
+
+
+type Direction
+    = Up
+    | Down
+    | Left
+    | Right
 
 
 type alias Position =
@@ -58,23 +86,23 @@ initRope =
     }
 
 
-toMove : String -> (Int -> Maybe Move)
-toMove input =
+toDirection : String -> Maybe Direction
+toDirection input =
     case input of
         "U" ->
-            Up >> Just
+            Just Up
 
         "R" ->
-            Right >> Just
+            Just Right
 
         "L" ->
-            Left >> Just
+            Just Left
 
         "D" ->
-            Down >> Just
+            Just Right
 
         _ ->
-            always Nothing
+            Nothing
 
 
 parse : String -> List Move
@@ -84,18 +112,17 @@ parse input =
             (\line ->
                 case String.split " " line of
                     [ direction, value ] ->
-                        String.toInt value
-                            |> Maybe.map (toMove direction)
+                        ( toDirection direction, String.toInt value )
 
                     _ ->
-                        Nothing
+                        ( Nothing, Nothing )
             )
-        |> Util.values
+        |> List.map Util.tupleValues
         |> Util.values
 
 
-isDiagonal : Rope -> Bool
-isDiagonal { head, tail } =
+holdTail : Rope -> Bool
+holdTail ({ head, tail } as rope) =
     let
         ( hx, hy ) =
             head
@@ -103,12 +130,25 @@ isDiagonal { head, tail } =
         ( tx, ty ) =
             tail
     in
-    (hx /= tx) && (hy /= ty)
+    ((hx /= tx) && (hy /= ty) && (Basics.abs (hx - tx) == 1) && (Basics.abs (hy - ty) == 1))
+        || rope
+        == initRope
 
 
-move : Move -> Rope -> Rope
-move m { head, tail } =
-    Debug.todo ""
+move : List Rope -> Move -> Rope -> Rope
+move history ( direction, steps ) rope =
+    if steps == 0 then
+        rope
+
+    else
+        case direction of
+            Up ->
+                updateRope 1 updateHeadX rope
+                    -- |> Util.updateIf (Debug.todo "")
+                    |> Debug.todo ""
+
+            _ ->
+                Debug.todo ""
 
 
 updateRope : Int -> (Int -> Rope -> Rope) -> Rope -> Rope
@@ -118,35 +158,19 @@ updateRope value func rope =
 
 updateHeadX : Int -> Rope -> Rope
 updateHeadX value rope =
-    let
-        ( hx, hy ) =
-            rope.head
-    in
-    { rope | head = ( hx + value, hy ) }
+    { rope | head = Tuple.mapFirst (always value) rope.head }
 
 
 updateHeadY : Int -> Rope -> Rope
 updateHeadY value rope =
-    let
-        ( hx, hy ) =
-            rope.head
-    in
-    { rope | head = ( hx, hy + value ) }
+    { rope | head = Tuple.mapSecond (always value) rope.head }
 
 
 updateTailX : Int -> Rope -> Rope
 updateTailX value rope =
-    let
-        ( tx, ty ) =
-            rope.tail
-    in
-    { rope | tail = ( tx + value, ty ) }
+    { rope | tail = Tuple.mapFirst (always value) rope.tail }
 
 
 updateTailY : Int -> Rope -> Rope
 updateTailY value rope =
-    let
-        ( tx, ty ) =
-            rope.tail
-    in
-    { rope | tail = ( tx, ty + value ) }
+    { rope | tail = Tuple.mapSecond (always value) rope.tail }

@@ -23,7 +23,7 @@ results =
     List.filterMap Result.toMaybe
 
 
-tupleValues : ( Maybe a, Maybe a ) -> Maybe ( a, a )
+tupleValues : ( Maybe a, Maybe b ) -> Maybe ( a, b )
 tupleValues ( ma, mb ) =
     Maybe.map2 (\x y -> ( x, y )) ma mb
 
@@ -126,3 +126,12 @@ takeWhile func list =
 
             else
                 []
+
+
+updateIf : (a -> Bool) -> (a -> a) -> a -> a
+updateIf boolFunc updateFunc value =
+    if boolFunc value then
+        updateFunc value
+
+    else
+        value

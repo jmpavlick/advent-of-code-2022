@@ -21,10 +21,7 @@ part2 input =
 
 part1 : String -> String
 part1 input =
-    --parse input
-    [ ( Right, 4 )
-    , ( Left, 3 )
-    ]
+    parse input
         |> run
         |> Debug.log "run output"
         |> getUniqueTailPositions
@@ -78,7 +75,7 @@ toDirection input =
             Just Left
 
         "D" ->
-            Just Right
+            Just Down
 
         _ ->
             Nothing
@@ -100,19 +97,46 @@ parse input =
         |> Util.values
 
 
-moveTail : Rope -> Bool
-moveTail ({ head, tail } as rope) =
+{-| moveTail is wrong.
+
+    we need to know the next move, relative to the rope
+    , before we can know to move the tail or not
+
+-}
+moveTail : Direction -> Rope -> Bool
+moveTail direction ({ head, tail } as rope) =
     let
         ( hx, hy ) =
             head
 
         ( tx, ty ) =
             tail
+
+        becauseNotOverlapping : Bool
+        becauseNotOverlapping =
+            head /= tail
+
+        becauseNotDiagonalAdjacent : Bool
+        becauseNotDiagonalAdjacent =
+            ((hx /= tx) && (hy /= ty) && (Basics.abs (hx - tx) == 1) && (Basics.abs (hy - ty) == 1))
+                |> not
+
+        becauseNextMoveValid : Bool
+        becauseNextMoveValid =
+            case direction of
+                Up ->
+                    hy /= ty
+
+                Down ->
+                    hy /= ty
+
+                Left ->
+                    hx /= tx
+
+                Right ->
+                    hx /= tx
     in
-    ((hx /= tx) && (hy /= ty) && (Basics.abs (hx - tx) == 1) && (Basics.abs (hy - ty) == 1))
-        || rope
-        == initRope
-        |> not
+    becauseNotOverlapping && becauseNotDiagonalAdjacent && becauseNextMoveValid
 
 
 run : List Move -> List Rope
@@ -150,7 +174,7 @@ move ( direction, steps ) rope =
                     new : Rope
                     new =
                         updateRope (hy + 1) setHeadY rope
-                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                            |> Util.updateIf (moveTail direction) (updateRope hy setTailY >> updateRope hx setTailX)
                 in
                 new :: move ( direction, steps - 1 ) new
 
@@ -159,7 +183,7 @@ move ( direction, steps ) rope =
                     new : Rope
                     new =
                         updateRope (hy - 1) setHeadY rope
-                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                            |> Util.updateIf (moveTail direction) (updateRope hy setTailY >> updateRope hx setTailX)
                 in
                 new :: move ( direction, steps - 1 ) new
 
@@ -168,7 +192,7 @@ move ( direction, steps ) rope =
                     new : Rope
                     new =
                         updateRope (hx - 1) setHeadX rope
-                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                            |> Util.updateIf (moveTail direction) (updateRope hy setTailY >> updateRope hx setTailX)
                 in
                 new :: move ( direction, steps - 1 ) new
 
@@ -177,7 +201,7 @@ move ( direction, steps ) rope =
                     new : Rope
                     new =
                         updateRope (hx + 1) setHeadX rope
-                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                            |> Util.updateIf (moveTail direction) (updateRope hy setTailY >> updateRope hx setTailX)
                 in
                 new :: move ( direction, steps - 1 ) new
 

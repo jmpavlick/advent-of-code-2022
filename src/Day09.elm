@@ -21,35 +21,10 @@ part2 input =
 
 part1 : String -> String
 part1 input =
-    List.map (\x -> ( x, holdTail x ))
-        [ { head = ( 0, 0 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( 0, 1 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( 1, 1 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( 1, 0 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( 1, -1 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( 0, -1 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( -1, -1 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( -1, 0 )
-          , tail = ( 0, 0 )
-          }
-        , { head = ( -1, 1 )
-          , tail = ( 0, 0 )
-          }
-        ]
+    move ( Right, 4 ) initRope
+        |> List.head
+        |> Maybe.withDefault initRope
+        |> move ( Up, 4 )
         |> Debug.toString
 
 
@@ -121,8 +96,8 @@ parse input =
         |> Util.values
 
 
-holdTail : Rope -> Bool
-holdTail ({ head, tail } as rope) =
+moveTail : Rope -> Bool
+moveTail ({ head, tail } as rope) =
     let
         ( hx, hy ) =
             head
@@ -133,22 +108,66 @@ holdTail ({ head, tail } as rope) =
     ((hx /= tx) && (hy /= ty) && (Basics.abs (hx - tx) == 1) && (Basics.abs (hy - ty) == 1))
         || rope
         == initRope
+        |> not
 
 
-move : List Rope -> Move -> Rope -> Rope
-move history ( direction, steps ) rope =
+move : Move -> Rope -> List Rope
+move ( direction, steps ) rope =
+    let
+        hx : Int
+        hx =
+            Tuple.first rope.head
+
+        hy : Int
+        hy =
+            Tuple.second rope.head
+    in
     if steps == 0 then
-        rope
+        []
 
     else
         case direction of
             Up ->
-                updateRope 1 updateHeadX rope
-                    -- |> Util.updateIf (Debug.todo "")
-                    |> Debug.todo ""
+                let
+                    new : Rope
+                    new =
+                        updateRope (hy + 1) setHeadY rope
+                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                in
+                new :: move ( direction, steps - 1 ) new
 
-            _ ->
-                Debug.todo ""
+            Down ->
+                let
+                    new : Rope
+                    new =
+                        updateRope (hy - 1) setHeadY rope
+                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                in
+                new :: move ( direction, steps - 1 ) new
+
+            Left ->
+                let
+                    new : Rope
+                    new =
+                        updateRope (hx - 1) setHeadX rope
+                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                in
+                new :: move ( direction, steps - 1 ) new
+
+            Right ->
+                let
+                    new : Rope
+                    new =
+                        updateRope (hx + 1) setHeadX rope
+                            |> Util.updateIf moveTail (updateRope hy setTailY >> updateRope hx setTailX)
+                in
+                new :: move ( direction, steps - 1 ) new
+
+
+getUniqueTailPositions : List Rope -> List Position
+getUniqueTailPositions list =
+    List.map .tail list
+        |> Util.unique
 
 
 updateRope : Int -> (Int -> Rope -> Rope) -> Rope -> Rope
@@ -156,21 +175,21 @@ updateRope value func rope =
     func value rope
 
 
-updateHeadX : Int -> Rope -> Rope
-updateHeadX value rope =
+setHeadX : Int -> Rope -> Rope
+setHeadX value rope =
     { rope | head = Tuple.mapFirst (always value) rope.head }
 
 
-updateHeadY : Int -> Rope -> Rope
-updateHeadY value rope =
+setHeadY : Int -> Rope -> Rope
+setHeadY value rope =
     { rope | head = Tuple.mapSecond (always value) rope.head }
 
 
-updateTailX : Int -> Rope -> Rope
-updateTailX value rope =
+setTailX : Int -> Rope -> Rope
+setTailX value rope =
     { rope | tail = Tuple.mapFirst (always value) rope.tail }
 
 
-updateTailY : Int -> Rope -> Rope
-updateTailY value rope =
+setTailY : Int -> Rope -> Rope
+setTailY value rope =
     { rope | tail = Tuple.mapSecond (always value) rope.tail }

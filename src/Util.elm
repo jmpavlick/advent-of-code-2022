@@ -135,3 +135,22 @@ updateIf boolFunc updateFunc value =
 
     else
         value
+
+
+unique : List comparable -> List comparable
+unique list =
+    List.sort list |> uniqueHelp
+
+
+uniqueHelp : List comparable -> List comparable
+uniqueHelp list =
+    case list of
+        [] ->
+            []
+
+        x :: xs ->
+            if List.member x xs then
+                uniqueHelp xs
+
+            else
+                x :: uniqueHelp xs

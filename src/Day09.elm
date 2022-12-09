@@ -21,10 +21,14 @@ part2 input =
 
 part1 : String -> String
 part1 input =
-    move ( Right, 4 ) initRope
-        |> List.head
-        |> Maybe.withDefault initRope
-        |> move ( Up, 4 )
+    --parse input
+    [ ( Right, 4 )
+    , ( Left, 3 )
+    ]
+        |> run
+        |> Debug.log "run output"
+        |> getUniqueTailPositions
+        |> List.length
         |> Debug.toString
 
 
@@ -109,6 +113,20 @@ moveTail ({ head, tail } as rope) =
         || rope
         == initRope
         |> not
+
+
+run : List Move -> List Rope
+run moves =
+    let
+        step : Move -> List Rope -> List Rope
+        step m acc =
+            List.reverse acc
+                |> List.head
+                |> Maybe.withDefault initRope
+                |> move m
+                |> List.append acc
+    in
+    List.foldl step [] moves
 
 
 move : Move -> Rope -> List Rope

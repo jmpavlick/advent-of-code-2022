@@ -23,7 +23,7 @@ part1 : String -> String
 part1 input =
     parse input
         |> run
-        |> Debug.log "run output"
+        --|> Debug.log "run output"
         |> getUniqueTailPositions
         |> List.length
         |> Debug.toString

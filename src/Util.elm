@@ -154,3 +154,18 @@ uniqueHelp list =
 
             else
                 x :: uniqueHelp xs
+
+
+groupsOf : Int -> List a -> List (List a)
+groupsOf count input =
+    groupsOfHelp count input |> List.reverse
+
+
+groupsOfHelp : Int -> List a -> List (List a)
+groupsOfHelp count input =
+    case List.take count input of
+        [] ->
+            []
+
+        something ->
+            something :: groupsOfHelp count (List.drop count input)
